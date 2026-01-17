@@ -39,3 +39,10 @@ See the README files in each subdirectory for individual service setup:
 - [Backend README](./backend/README.md)
 - [Frontend README](./frontend/README.md)
 - [Scraper Service README](./scraper-service/README.md)
+
+## Known Issues & Notes
+
+> [!NOTE]
+> The following are known bugs and areas for improvement:
+> 1. **Puppeteer Stability**: Puppeteer sometimes fails to fetch detail pages successfully. This may require better error handling or retry logic.
+> 2. **Search Parameters**: The Google Maps search parameter logic needs improvement to yield better results during scraping.
