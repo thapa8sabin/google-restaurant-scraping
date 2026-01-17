@@ -89,54 +89,42 @@ app.get('/restaurants/:id', async (req, res) => {
 
 // Scrape Route (Admin only)
 app.post('/admin/scrape', authenticateToken, async (req, res) => {
-  const { lat, lng, radius } = req.body;
+  const { lat, lng, radius, scheduleTime, repeatCron } = req.body;
   if (!lat || !lng || !radius) return res.status(400).json({ error: 'Missing parameters' });
 
-  // Trigger scrape
-  // In a real app, this should be a background job.
-  // We'll await it for simplicity or fire and forget.
   try {
     // Save area
     const area = await prisma.scrapeArea.create({
       data: { lat, lng, radius }
     });
 
-    // Call scraper (async in background usually, but here await to see result or minimal await)
-    // For demo, we might want to wait a bit or just return "Started".
-    // Let's fire and forget for the response, but log it.
-    scrapeGoogleMaps(lat, lng, radius).then(async (restaurants) => {
-      console.log(`Scrape finished. Found ${restaurants.length} restaurants.`);
+    console.log(`Scheduling scrape for area ${area.id}`);
 
-      for (const r of restaurants) {
-        try {
-          await prisma.restaurant.upsert({
-            where: { placeId: r.placeId },
-            update: {
-              name: r.name,
-              rating: r.rating,
-              isOpen: r.isOpen,
-              images: r.images,
-              updatedAt: new Date(),
-            },
-            create: {
-              placeId: r.placeId,
-              name: r.name,
-              lat: r.lat,
-              lng: r.lng,
-              rating: r.rating,
-              isOpen: r.isOpen,
-              images: r.images,
-            }
-          });
-        } catch (e) {
-          console.error(`Failed to save restaurant ${r.name}`, e);
-        }
-      }
-      console.log("Database update complete.");
-    }).catch(console.error);
+    // Create Queue
+    const { Queue } = require('bullmq');
+    const redisConnection = {
+      host: process.env.REDIS_HOST || 'redis', // 'redis' is the docker service name
+      port: parseInt(process.env.REDIS_PORT || '6379')
+    };
 
-    res.json({ message: 'Scrape started', areaId: area.id });
+    const queue = new Queue('scrape-queue', { connection: redisConnection });
+
+    const jobOptions = {};
+    if (scheduleTime) {
+      const delay = new Date(scheduleTime).getTime() - Date.now();
+      if (delay > 0) jobOptions.delay = delay;
+    }
+    if (repeatCron) {
+      jobOptions.repeat = { pattern: repeatCron };
+    }
+
+    await queue.add('scrape-area', {
+      lat, lng, radius, areaId: area.id
+    }, jobOptions);
+
+    res.json({ message: 'Scrape scheduled successfully', areaId: area.id, jobId: 'queued' });
   } catch (error) {
+    console.error("Booking error", error);
     res.status(500).json({ error: error.message });
   }
 });

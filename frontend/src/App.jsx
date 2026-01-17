@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import PublicMap from './pages/PublicMap';
+import RestaurantDetail from './pages/RestaurantDetail';
 import AdminDashboard from './pages/AdminDashboard';
 
 const PrivateRoute = ({ children }) => {
@@ -18,6 +19,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<PublicMap />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/restaurant/:id" element={<RestaurantDetail />} />
                     <Route
                         path="/admin"
                         element={

@@ -37,5 +37,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  scraper:
+    build: ./scraper-service
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/restaurant_db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./scraper-service:/app
+      - /app/node_modules
+
 volumes:
   postgres_data:

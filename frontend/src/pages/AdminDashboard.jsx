@@ -29,6 +29,8 @@ const AdminDashboard = () => {
     const { logout } = useAuth();
     const [position, setPosition] = useState(null);
     const [radius, setRadius] = useState(1000); // meters
+    const [scheduleTime, setScheduleTime] = useState('');
+    const [repeatType, setRepeatType] = useState('none');
     const [areas, setAreas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -54,11 +56,24 @@ const AdminDashboard = () => {
         setLoading(true);
         setMessage('Scraping started...');
         try {
-            await api.post('/admin/scrape', {
+            const payload = {
                 lat: position.lat,
                 lng: position.lng,
                 radius: parseFloat(radius),
-            });
+            };
+
+            if (scheduleTime) payload.scheduleTime = new Date(scheduleTime).toISOString();
+
+            if (repeatType !== 'none') {
+                const map = {
+                    hourly: '0 * * * *',
+                    daily: '0 0 * * *',
+                    weekly: '0 0 * * 0'
+                };
+                payload.repeatCron = map[repeatType];
+            }
+
+            await api.post('/admin/scrape', payload);
             setMessage('Scrape triggered successfully!');
             fetchAreas();
         } catch (error) {
@@ -96,6 +111,30 @@ const AdminDashboard = () => {
                             onChange={(e) => setRadius(e.target.value)}
                             className="w-full border p-2 rounded"
                         />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium mb-1">Schedule Start (Optional)</label>
+                        <input
+                            type="datetime-local"
+                            value={scheduleTime}
+                            onChange={(e) => setScheduleTime(e.target.value)}
+                            className="w-full border p-2 rounded text-sm"
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium mb-1">Repeat Scrape</label>
+                        <select
+                            value={repeatType}
+                            onChange={(e) => setRepeatType(e.target.value)}
+                            className="w-full border p-2 rounded"
+                        >
+                            <option value="none">One-time only</option>
+                            <option value="hourly">Every Hour</option>
+                            <option value="daily">Every Day</option>
+                            <option value="weekly">Every Week</option>
+                        </select>
                     </div>
                     <button
                         onClick={handleScrape}

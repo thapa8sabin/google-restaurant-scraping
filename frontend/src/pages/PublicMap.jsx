@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import api from '../services/api';
@@ -56,10 +57,16 @@ const PublicMap = () => {
                                     <span>⭐ {restaurant.rating}</span>
                                 </div>
                                 {restaurant.isOpen !== null && (
-                                    <div className={`text-xs mt-1 ${restaurant.isOpen ? 'text-green-600' : 'text-red-600'}`}>
+                                    <div className={`text-xs mt-1 mb-2 ${restaurant.isOpen ? 'text-green-600' : 'text-red-600'}`}>
                                         {restaurant.isOpen ? 'Open Now' : 'Closed'}
                                     </div>
                                 )}
+                                <Link
+                                    to={`/restaurant/${restaurant.id}`}
+                                    className="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white text-sm py-1 px-2 rounded transition-colors"
+                                >
+                                    View Details
+                                </Link>
                             </div>
                         </Popup>
                     </Marker>
