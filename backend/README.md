@@ -20,7 +20,7 @@ This is the backend API for the Restaurant Map Discovery application. It handles
 
 1.  **Install Dependencies**:
     ```bash
-    npm install
+    npm install --legacy-peer-deps
     ```
 
 2.  **Environment Variables**:

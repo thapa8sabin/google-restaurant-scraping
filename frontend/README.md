@@ -18,7 +18,7 @@ The user interface for discovering and viewing restaurants on an interactive map
 
 1.  **Install Dependencies**:
     ```bash
-    npm install
+    npm install --legacy-peer-deps
     ```
 
 2.  **Environment Variables**:

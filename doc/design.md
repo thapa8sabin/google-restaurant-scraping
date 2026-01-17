@@ -3,40 +3,6 @@
 This document outlines the high-level architecture of the Restaurant Map Discovery system. It's a containerized application composed of a frontend, backend API, background scraper service, and data persistence layers.
 
 ## Architecture Diagram
-```mermaid
-graph TD
-  subgraph Client
-    User[User Browser]
-  end
-
-  subgraph ContainerizedSystem["Containerized System"]
-    subgraph Services
-      Frontend[Frontend<br/>(React + Vite)]
-      Backend[Backend API<br/>(Express)]
-      Scraper[Scraper Service<br/>(Background Worker)]
-    end
-    
-    subgraph Databases
-      DB[PostgreSQL]
-      RedisDB[Redis]
-    end
-  end
-
-  User -->|HTTP/HTTPS| Frontend
-  Frontend -->|API Requests| Backend
-  Backend -->|Reads/Writes| DB
-  Backend -->|Job Queue/Cache| RedisDB
-  Scraper -->|Polls/Consumes Jobs| RedisDB
-  Scraper -->|Updates Data| DB
-
-  classDef client fill:#e1f5fe
-  classDef service fill:#f3e5f5
-  classDef db fill:#e8f5e8
-
-  class User client
-  class Frontend,Backend,Scraper service
-  class DB,RedisDB db
-```
 
 ![Design](image.png)
 
